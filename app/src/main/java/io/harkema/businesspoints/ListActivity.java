@@ -67,8 +67,8 @@ public class ListActivity extends AppCompatActivity {
 
     private void updateInfos() {
 
-        int finishedECTS = App.instance.storageService.getFinishedECTS();
-        int allECTS = App.instance.storageService.getAllECTS();
+        int finishedECTS = App.instance.businessPointsDbHelper.getFinishedECTS();
+        int allECTS = App.instance.businessPointsDbHelper.getAllECTS();
         ((TextView)findViewById(R.id.extraInfo)).setText("TOTAL ECTS: " + allECTS + "\nECTS TO GO: " + (allECTS - finishedECTS));
     }
 }

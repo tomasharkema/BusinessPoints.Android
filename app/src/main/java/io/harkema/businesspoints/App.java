@@ -2,7 +2,8 @@ package io.harkema.businesspoints;
 
 import android.content.Context;
 
-import io.harkema.businesspoints.storage.StorageService;
+import io.harkema.businesspoints.storage.BusinessPointsDbHelper;
+//import io.harkema.businesspoints.storage.StorageService;
 
 /**
  * Created by tomas on 16-1-16.
@@ -20,11 +21,13 @@ public class App {
     }
 
     public Context context;
-    public StorageService storageService;
+    //public StorageService storageService;
+    public BusinessPointsDbHelper businessPointsDbHelper;
 
     public App(Context context) {
         this.context = context;
 
-        storageService = new StorageService(context);
+        //storageService = new StorageService(context);
+        businessPointsDbHelper = new BusinessPointsDbHelper(context);
     }
 }

@@ -7,17 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.j256.ormlite.android.AndroidDatabaseResults;
-import com.j256.ormlite.dao.CloseableIterator;
-import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.PreparedQuery;
-import com.j256.ormlite.stmt.QueryBuilder;
-
 import org.w3c.dom.Text;
 
+import java.util.List;
 import java.util.Objects;
 
-import io.harkema.businesspoints.helpers.OrmliteCursorRecyclerViewAdapter;
+//import io.harkema.businesspoints.helpers.OrmliteCursorRecyclerViewAdapter;
 import io.harkema.businesspoints.model.BusinessPoint;
 
 /**
@@ -25,7 +20,7 @@ import io.harkema.businesspoints.model.BusinessPoint;
  */
 
 
-public class BusinessPointsAdapter extends OrmliteCursorRecyclerViewAdapter<BusinessPoint, BusinessPointsAdapter.ViewHolder> {
+public class BusinessPointsAdapter extends RecyclerView.Adapter<BusinessPointsAdapter.ViewHolder> { //extends OrmliteCursorRecyclerViewAdapter<BusinessPoint, BusinessPointsAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public View view;
@@ -43,35 +38,14 @@ public class BusinessPointsAdapter extends OrmliteCursorRecyclerViewAdapter<Busi
         boolean onItemLongPress(BusinessPoint businessPoint);
     }
 
-    private Cursor cursor;
+    private List<BusinessPoint> businessPoints;
     private OnItemClickListener onItemClickListener;
     private OnItemLongPressListener onItemLongPressListener;
 
-    private BusinessPointsAdapter(Cursor cursor) {
-        super(cursor);
-    }
-
     public static BusinessPointsAdapter getForAll() {
-        Dao<BusinessPoint, Integer> businessPointDao = App.instance.storageService.getBusinessPointDao();
-        Cursor cursor = null;
-        PreparedQuery<BusinessPoint> query = null;
-        QueryBuilder<BusinessPoint, Integer> queryBuilder = businessPointDao.queryBuilder();
-        try {
-            query = queryBuilder.where()
-                    .isNotNull("title")
-                    .prepare();
-
-            CloseableIterator<BusinessPoint> iterator = businessPointDao.iterator(query);
-            AndroidDatabaseResults results = (AndroidDatabaseResults) iterator.getRawResults();
-            cursor = results.getRawCursor();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        BusinessPointsAdapter adapter = new BusinessPointsAdapter(cursor);
+        BusinessPointsAdapter adapter = new BusinessPointsAdapter();
         adapter.setHasStableIds(true);
-        adapter.cursor = cursor;
-        adapter.changeCursor(cursor, query);
+        adapter.businessPoints = App.instance.businessPointsDbHelper.getAllBusinessPoints();
         return adapter;
     }
 
@@ -84,8 +58,11 @@ public class BusinessPointsAdapter extends OrmliteCursorRecyclerViewAdapter<Busi
         return cellViewHolder;
     }
 
+
     @Override
-    public void onBindViewHolder(ViewHolder holder, final BusinessPoint businessPoint) {
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        final BusinessPoint businessPoint = businessPoints.get(position);
+
         final TextView titleView = (TextView)holder.view.findViewById(R.id.titleView);
         titleView.setText(businessPoint.title);
 
@@ -114,8 +91,8 @@ public class BusinessPointsAdapter extends OrmliteCursorRecyclerViewAdapter<Busi
 
     @Override
     public int getItemCount() {
-        if (cursor != null) {
-            return cursor.getCount();
+        if (businessPoints != null) {
+            return businessPoints.size();
         } else {
             return 0;
         }
@@ -123,24 +100,11 @@ public class BusinessPointsAdapter extends OrmliteCursorRecyclerViewAdapter<Busi
 
     @Override
     public long getItemId(int position) {
-        if (hasStableIds() && cursor != null) {
-            if (cursor.moveToPosition(position)) {
-                return cursor.getLong(cursor.getColumnIndexOrThrow("_id"));
-            } else {
-                return RecyclerView.NO_ID;
-            }
-        } else {
-            return RecyclerView.NO_ID;
-        }
+        return businessPoints.get(position).id;
     }
 
     public Object getItem(int position) {
-        if (cursor != null) {
-            cursor.moveToPosition(position);
-            return cursor;
-        } else {
-            return null;
-        }
+        return businessPoints.get(position);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {

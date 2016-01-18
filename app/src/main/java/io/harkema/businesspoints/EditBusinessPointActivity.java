@@ -46,7 +46,7 @@ public class EditBusinessPointActivity extends AppCompatActivity {
 
         final int bId = getIntent().getIntExtra(ListActivity.BUSINESS_POINT_VALUE, -1);
         if (bId != -1) {
-            this.businessPoint = App.instance.storageService.getBusinessPointById(bId);
+            this.businessPoint = App.instance.businessPointsDbHelper.getById(bId);
             fillBusinessPoint();
         }
 
@@ -69,7 +69,7 @@ public class EditBusinessPointActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.delete) {
-            App.instance.storageService.deleteBusinessPoint(businessPoint);
+            App.instance.businessPointsDbHelper.deleteBusinessPoint(businessPoint);
             finish();
             return true;
         }
@@ -95,9 +95,11 @@ public class EditBusinessPointActivity extends AppCompatActivity {
         BusinessPoint businessPoint = new BusinessPoint(courseName, teacher, ects, finished, grade);
         if (this.businessPoint != null) {
             businessPoint.id = this.businessPoint.id;
-        }
 
-        App.instance.storageService.createOrUpdateBusinessPoint(businessPoint);
+            App.instance.businessPointsDbHelper.update(businessPoint);
+        } else {
+            App.instance.businessPointsDbHelper.create(businessPoint);
+        }
 
         this.businessPoint = null;
         finish();
